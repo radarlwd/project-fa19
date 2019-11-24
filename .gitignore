@@ -1,3 +1,6 @@
+*.txt
+*.in
+*.out
 *.p
 
 # Created by https://www.gitignore.io/api/vim,pycharm,jupyternotebooks
