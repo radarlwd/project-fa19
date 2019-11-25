@@ -25,7 +25,12 @@ def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_mat
         A dictionary mapping drop-off location to a list of homes of TAs that got off at that particular location
         NOTE: both outputs should be in terms of indices not the names of the locations themselves
     """
-    pass
+    # print("testing" + str(convert_locations_to_indices([starting_car_location], list_of_locations)))
+    car_path = convert_locations_to_indices([starting_car_location], list_of_locations)
+    drop_off_locations = {convert_locations_to_indices([starting_car_location], list_of_locations)[0]:
+                              convert_locations_to_indices(list_of_homes, list_of_locations)}
+
+    return car_path, drop_off_locations
 
 """
 ======================================================================
