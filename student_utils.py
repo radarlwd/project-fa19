@@ -23,6 +23,8 @@ def data_parser(input_data):
 
 
 def adjacency_matrix_to_graph(adjacency_matrix):
+    """Return a graph with the nodes are indices of locations"""
+
     node_weights = [adjacency_matrix[i][i] for i in range(len(adjacency_matrix))]
     adjacency_matrix_formatted = [[0 if entry == 'x' else entry for entry in row] for row in adjacency_matrix]
 

@@ -4,8 +4,8 @@ sys.path.append('..')
 sys.path.append('../..')
 import argparse
 import utils
-
 from student_utils import *
+
 """
 ======================================================================
   Complete the following function.
@@ -25,7 +25,25 @@ def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_mat
         A dictionary mapping drop-off location to a list of homes of TAs that got off at that particular location
         NOTE: both outputs should be in terms of indices not the names of the locations themselves
     """
-    pass
+
+    start_idx = list_of_locations.index(starting_car_location)
+    homes_idx = [list_of_locations.index(h) for h in list_of_homes]
+    graph1, msg1 = adjacency_matrix_to_graph(adjacency_matrix)
+    path = []
+    drop_offs = {}
+    current_idx = start_idx
+    while homes_idx:
+        lst_dist = [(h_idx, nx.shortest_path_length(graph1, current_idx, h_idx, 'weight')) for h_idx in homes_idx]
+        idx, _ = min(lst_dist, key=lambda x: x[1])
+        shortest_path = nx.shortest_path(graph1, current_idx, idx, 'weight')
+        shortest_path.pop()
+        path.extend(shortest_path)
+        drop_offs[idx] = [idx]
+        current_idx = idx
+        homes_idx.remove(idx)
+    last_shortest_path = nx.shortest_path(graph1, current_idx, start_idx, 'weight')
+    path.extend(last_shortest_path)
+    return path, drop_offs
 
 """
 ======================================================================
