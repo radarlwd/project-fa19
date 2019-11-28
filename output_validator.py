@@ -39,8 +39,7 @@ def validate_all_outputs(input_directory, output_directory, params=[]):
             results = (None, None, f'No corresponding .out file for {input_file}')
         else:
             results = validate_output(input_file, output_file, params=params)
-
-        all_results.append((input_file, results))
+        all_results.append((input_file, output_file, results))
     return all_results
 
 
@@ -115,13 +114,15 @@ if __name__ == '__main__':
     parser.add_argument('--all', action='store_true', help='If specified, the output validator is run on all files in the output directory. Else, it is run on just the given output file')
     parser.add_argument('input', type=str, help='The path to the input file or directory')
     parser.add_argument('output', type=str, help='The path to the output file or directory')
+    parser.add_argument('pickle', type=str, help='The path to the pickle file')
     parser.add_argument('params', nargs=argparse.REMAINDER, help='Extra arguments passed in')
     args = parser.parse_args()
     if args.all:
         input_directory, output_directory = args.input, args.output
         all_results = validate_all_outputs(input_directory, output_directory, params=args.params)
-        lst_costs = [x[1][0] for x in all_results]
+        lst_costs = [x[2][0] for x in all_results]
         print('Total cost is: ', sum(lst_costs))
+        save_obj(all_results, args.pickle)
     else:
         input_file, output_file = args.input, args.output
         validate_output(input_file, output_file, params=args.params)

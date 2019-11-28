@@ -1,5 +1,6 @@
 import networkx as nx
 import numpy as np
+import pickle
 
 
 def decimal_digits_check(number):
@@ -113,3 +114,9 @@ def cost_of_solution(G, car_cycle, dropoff_mapping):
 
 def convert_locations_to_indices(list_to_convert, list_of_locations):
     return [list_of_locations.index(name) if name in list_of_locations else None for name in list_to_convert]
+
+def save_obj(obj, filename):
+    pickle.dump(obj, open(filename, "wb"))
+
+def load_obj(filename):
+    return pickle.load(open(filename, "rb"))
