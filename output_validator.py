@@ -15,14 +15,15 @@ def validate_output(input_file, output_file, params=[]):
     input_data = utils.read_file(input_file)
     output_data = utils.read_file(output_file)
 
-    input_message, input_error = input_validator.tests(input_file)
+    # input_message, input_error = input_validator.tests(input_file)
     cost, message = tests(input_data, output_data, params=params)
-    message = 'Comments about input file:\n\n' + input_message + 'Comments about output file:\n\n' + message
+    # message = 'Comments about input file:\n\n' + input_message + 'Comments about output file:\n\n' + message
+    message = 'Comments about output file:\n\n' + message
 
     print(message)
-    if input_error:
-        return input_error, 'infinite', input_message + 'Since this input is invalid, you will not receive a score for its output.\n'
-    return input_error, cost, message
+    # if input_error:
+    #     return input_error, 'infinite', input_message + 'Since this input is invalid, you will not receive a score for its output.\n'
+    return cost, message
 
 
 def validate_all_outputs(input_directory, output_directory, params=[]):
@@ -118,7 +119,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.all:
         input_directory, output_directory = args.input, args.output
-        validate_all_outputs(input_directory, output_directory, params=args.params)
+        all_results = validate_all_outputs(input_directory, output_directory, params=args.params)
+        lst_costs = [x[1][0] for x in all_results]
+        print('Total cost is: ', sum(lst_costs))
     else:
         input_file, output_file = args.input, args.output
         validate_output(input_file, output_file, params=args.params)
