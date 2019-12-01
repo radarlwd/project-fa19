@@ -23,6 +23,12 @@ def validate_output(input_file, output_file, params=[]):
     print(message)
     # if input_error:
     #     return input_error, 'infinite', input_message + 'Since this input is invalid, you will not receive a score for its output.\n'
+
+    # Stop the script at the first error
+    if isinstance(cost, str):
+        print('First error')
+        sys.exit()
+
     return cost, message
 
 
