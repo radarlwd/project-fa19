@@ -12,17 +12,17 @@ if __name__ == '__main__':
     pickle = 'pickle_output/' + args.algo + '.p'
     log = args.algo + '/log.txt'
     if args.mode == 'test':
-        os.system('python ' + args.solver + ' --all test_inputs test_outputs')
+        os.system('python3 ' + args.solver + ' --all test_inputs test_outputs')
     elif args.mode == 'test_validate':
-        os.system('python output_validator.py --all test_inputs test_outputs pickle_output/test.p 2>&1 | tee test_log.txt')
+        os.system('python3 output_validator.py --all test_inputs test_outputs pickle_output/test.p 2>&1 | tee test_log.txt')
     elif args.mode == 'all':
         os.mkdir(full_algo)
         os.mkdir(full_outputs)
-        os.system('python ' + args.solver + ' --all inputs ' + outputs)
+        os.system('python3 ' + args.solver + ' --all inputs ' + outputs)
     elif args.mode == 'validate':
-        os.system('python output_validator.py --all inputs ' + outputs + ' ' + pickle + ' 2>&1 | tee ' + log)
+        os.system('python3 output_validator.py --all inputs ' + outputs + ' ' + pickle + ' 2>&1 | tee ' + log)
     elif args.mode == 'compress':
-        os.system('python compress_output.py ' + outputs + '/')
+        os.system('python3 compress_output.py ' + outputs + '/')
 
 
 
