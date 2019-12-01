@@ -28,22 +28,45 @@ def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_mat
 
     start_idx = list_of_locations.index(starting_car_location)
     homes_idx = [list_of_locations.index(h) for h in list_of_homes]
-    graph1, msg1 = adjacency_matrix_to_graph(adjacency_matrix)
-    path = []
+    nodes = homes_idx + [start_idx]
+    graph, msg = adjacency_matrix_to_graph(adjacency_matrix)
+    newgraph = graph.subgraph(nodes)
+    if not nx.is_connected(newgraph):
+        newgraph = connect_homes(graph, nodes)
+    mst = nx.minimum_spanning_tree(newgraph, 'weight')
+    dfs = list(nx.dfs_edges(mst, start_idx))
+    path = [start_idx]
     drop_offs = {}
-    current_idx = start_idx
-    while homes_idx:
-        lst_dist = [(h_idx, nx.shortest_path_length(graph1, current_idx, h_idx, 'weight')) for h_idx in homes_idx]
-        idx, _ = min(lst_dist, key=lambda x: x[1])
-        shortest_path = nx.shortest_path(graph1, current_idx, idx, 'weight')
-        shortest_path.pop()
-        path.extend(shortest_path)
-        drop_offs[idx] = [idx]
-        current_idx = idx
-        homes_idx.remove(idx)
-    last_shortest_path = nx.shortest_path(graph1, current_idx, start_idx, 'weight')
-    path.extend(last_shortest_path)
-    return path, drop_offs
+    if start_idx in homes_idx:
+        drop_offs[start_idx] = [start_idx]
+    current_idx = -1
+    while dfs:
+        edge = dfs.pop(0)
+        current_idx = edge[1]
+        if current_idx not in path:
+            path.append(current_idx)
+            drop_offs[current_idx] = [current_idx]
+    final_path = [path[0]]
+    for i in range(len(path)-1):
+        if graph.has_edge(path[i], path[i+1]):
+            final_path.append(path[i+1])
+        else:
+            final_path.pop()
+            final_path.extend(nx.shortest_path(graph, path[i], path[i+1], 'weight'))
+    last_shortest_path = nx.shortest_path(graph, final_path[-1], start_idx, 'weight')
+    final_path.pop()
+    final_path.extend(last_shortest_path)
+    return final_path, drop_offs
+
+def connect_homes(graph, nodes):
+    newgraph = nx.Graph()
+    newgraph.add_nodes_from(nodes)
+    for i in range(len(nodes)):
+        for j in range(i + 1, len(nodes)):
+            w = nx.shortest_path_length(graph, nodes[i], nodes[j], 'weight')
+            newgraph.add_edge(nodes[i], nodes[j], weight=w)
+    return newgraph
+
 
 """
 ======================================================================
