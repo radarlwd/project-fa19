@@ -1,6 +1,7 @@
 import networkx as nx
 import numpy as np
 import pickle
+import sys
 
 
 def decimal_digits_check(number):
@@ -110,6 +111,34 @@ def cost_of_solution(G, car_cycle, dropoff_mapping):
 
     message += f'The total cost of your solution is {cost}.\n'
     return cost, message
+
+def cost_of_solution_no_print(G, car_cycle, dropoff_mapping):
+    cost = 0
+    dropoffs = dropoff_mapping.keys()
+    if not is_valid_walk(G, car_cycle):
+        print('This is not a valid walk for the given graph.\n')
+        sys.exit()
+
+    if not car_cycle[0] == car_cycle[-1]:
+        print('The start and end vertices are not the same.\n')
+        sys.exit()
+    if cost != 'infinite':
+        if len(car_cycle) == 1:
+            car_cycle = []
+        else:
+            car_cycle = get_edges_from_path(car_cycle[:-1]) + [(car_cycle[-2], car_cycle[-1])]
+        if len(car_cycle) != 1:
+            driving_cost = sum([G.edges[e]['weight'] for e in car_cycle]) * 2 / 3
+        else:
+            driving_cost = 0
+        walking_cost = 0
+        shortest = dict(nx.floyd_warshall(G))
+
+        for drop_location in dropoffs:
+            for house in dropoff_mapping[drop_location]:
+                walking_cost += shortest[drop_location][house]
+        cost = driving_cost + walking_cost
+    return cost
 
 
 def convert_locations_to_indices(list_to_convert, list_of_locations):

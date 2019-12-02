@@ -27,63 +27,42 @@ def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_mat
         NOTE: both outputs should be in terms of indices not the names of the locations themselves
     """
 
-    return k_layers_cluster(2, list_of_locations, list_of_homes, starting_car_location, adjacency_matrix)
-
-
-def count_homes(k, graph, homes_idx):
-    lst = []
-    for node in graph.nodes():
-        lst_homes = []
-        neighbors = list(graph.neighbors(node))
-        for n in neighbors:
-            if n in homes_idx:
-                lst_homes.append(n)
-        if k == 2:
-            for n in neighbors:
-                for nn in graph.neighbors(n):
-                    if nn in homes_idx:
-                        lst_homes.append(nn)
-        if len(lst_homes) > 0:
-            lst.append((node, lst_homes))
-    return lst
-
-def init_pq(lst, graph, cur_idx):
-    shortest_paths = nx.shortest_path_length(graph, cur_idx, weight='weight')
-    pq = PriorityQueue()
-    for i in lst:
-        node = i[0]
-        pq.put((shortest_paths[node], i))
-    return pq
-
-def k_layers_cluster(k, list_of_locations, list_of_homes, starting_car_location, adjacency_matrix):
     start_idx = list_of_locations.index(starting_car_location)
     homes_idx = [list_of_locations.index(h) for h in list_of_homes]
-    graph, msg = adjacency_matrix_to_graph(adjacency_matrix)
-    path = []
-    drop_offs = {}
-    lst = count_homes(k, graph, homes_idx)
-    cur_idx = start_idx
-    while homes_idx:
-        pq = init_pq(lst, graph, cur_idx)
-        cost, center_homes = pq.get()
-        center = center_homes[0]
-        lst_homes = center_homes[1]
-        lst_copy = lst_homes.copy()
-        for h in lst_copy:
-            if h in homes_idx:
-                homes_idx.remove(h)
-            else:
-                lst_homes.remove(h)
-        if lst_homes:
-            shortest_path = nx.shortest_path(graph, cur_idx, center, 'weight')
+    graph1, msg1 = adjacency_matrix_to_graph(adjacency_matrix)
+    start_shortest_paths = nx.shortest_path(graph1, start_idx, target=None, weight='weight')
+    minimum = float('inf')
+    final_path = []
+    final_dropoffs = {}
+    for h in homes_idx:
+        path = []
+        path.extend(start_shortest_paths[h])
+        path.pop()
+        drop_offs = {}
+        if start_idx in homes_idx:
+            drop_offs[start_idx] = [start_idx]
+            homes_idx.remove(start_idx)
+        homes_copy = homes_idx.copy()
+        current_idx = h
+        while homes_copy:
+            lst_dist = []
+            shortest_path_length = nx.shortest_path_length(graph1, current_idx, target=None, weight='weight')
+            for h in homes_copy:
+                lst_dist.append((h, shortest_path_length[h]))
+            idx, _ = min(lst_dist, key=lambda x: x[1])
+            shortest_path = nx.shortest_path(graph1, current_idx, idx, 'weight')
             shortest_path.pop()
             path.extend(shortest_path)
-            drop_offs[center] = lst_homes
-            cur_idx = center
-        lst.remove(center_homes)
-    last_shortest_path = nx.shortest_path(graph, cur_idx, start_idx, 'weight')
-    path.extend(last_shortest_path)
-    return path, drop_offs
+            drop_offs[idx] = [idx]
+            current_idx = idx
+            homes_copy.remove(idx)
+        last_shortest_path = nx.shortest_path(graph1, current_idx, start_idx, 'weight')
+        path.extend(last_shortest_path)
+        cost = cost_of_solution_no_print(graph1, path, drop_offs)
+        if cost < minimum:
+            final_path = path
+            final_dropoffs = drop_offs
+    return final_path, final_dropoffs
 
 
 """
