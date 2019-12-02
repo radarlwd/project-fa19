@@ -5,6 +5,7 @@ sys.path.append('../..')
 import argparse
 import utils
 from student_utils import *
+from queue import PriorityQueue
 
 """
 ======================================================================
@@ -26,46 +27,63 @@ def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_mat
         NOTE: both outputs should be in terms of indices not the names of the locations themselves
     """
 
+    return k_layers_cluster(1, list_of_locations, list_of_homes, starting_car_location, adjacency_matrix)
+
+
+def count_homes(k, graph, homes_idx):
+    lst = []
+    for node in graph.nodes():
+        lst_homes = []
+        neighbors = list(graph.neighbors(node))
+        for n in neighbors:
+            if n in homes_idx:
+                lst_homes.append(n)
+        if k == 2:
+            for n in neighbors:
+                for nn in graph.neighbors(n):
+                    if nn in homes_idx:
+                        lst_homes.append(nn)
+        if len(lst_homes) > 0:
+            lst.append((node, lst_homes))
+    return lst
+
+def init_pq(lst, graph, cur_idx):
+    shortest_paths = nx.shortest_path_length(graph, cur_idx, weight='weight')
+    pq = PriorityQueue()
+    for i in lst:
+        node = i[0]
+        pq.put((shortest_paths[node], i))
+    return pq
+
+def k_layers_cluster(k, list_of_locations, list_of_homes, starting_car_location, adjacency_matrix):
     start_idx = list_of_locations.index(starting_car_location)
     homes_idx = [list_of_locations.index(h) for h in list_of_homes]
-    nodes = homes_idx + [start_idx]
     graph, msg = adjacency_matrix_to_graph(adjacency_matrix)
-    newgraph = graph.subgraph(nodes)
-    if not nx.is_connected(newgraph):
-        newgraph = connect_homes(graph, nodes)
-    mst = nx.minimum_spanning_tree(newgraph, 'weight')
-    dfs = list(nx.dfs_edges(mst, start_idx))
-    path = [start_idx]
+    path = []
     drop_offs = {}
-    if start_idx in homes_idx:
-        drop_offs[start_idx] = [start_idx]
-    current_idx = -1
-    while dfs:
-        edge = dfs.pop(0)
-        current_idx = edge[1]
-        if current_idx not in path:
-            path.append(current_idx)
-            drop_offs[current_idx] = [current_idx]
-    final_path = [path[0]]
-    for i in range(len(path)-1):
-        if graph.has_edge(path[i], path[i+1]):
-            final_path.append(path[i+1])
-        else:
-            final_path.pop()
-            final_path.extend(nx.shortest_path(graph, path[i], path[i+1], 'weight'))
-    last_shortest_path = nx.shortest_path(graph, final_path[-1], start_idx, 'weight')
-    final_path.pop()
-    final_path.extend(last_shortest_path)
-    return final_path, drop_offs
-
-def connect_homes(graph, nodes):
-    newgraph = nx.Graph()
-    newgraph.add_nodes_from(nodes)
-    for i in range(len(nodes)):
-        for j in range(i + 1, len(nodes)):
-            w = nx.shortest_path_length(graph, nodes[i], nodes[j], 'weight')
-            newgraph.add_edge(nodes[i], nodes[j], weight=w)
-    return newgraph
+    lst = count_homes(k, graph, homes_idx)
+    cur_idx = start_idx
+    while homes_idx:
+        pq = init_pq(lst, graph, cur_idx)
+        cost, center_homes = pq.get()
+        center = center_homes[0]
+        lst_homes = center_homes[1]
+        lst_copy = lst_homes.copy()
+        for h in lst_copy:
+            if h in homes_idx:
+                homes_idx.remove(h)
+            else:
+                lst_homes.remove(h)
+        if lst_homes:
+            shortest_path = nx.shortest_path(graph, cur_idx, center, 'weight')
+            shortest_path.pop()
+            path.extend(shortest_path)
+            drop_offs[center] = lst_homes
+            cur_idx = center
+        lst.remove(center_homes)
+    last_shortest_path = nx.shortest_path(graph, cur_idx, start_idx, 'weight')
+    path.extend(last_shortest_path)
+    return path, drop_offs
 
 
 """
