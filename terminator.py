@@ -1,10 +1,10 @@
-import argparse, os
+import argparse, os, shutil
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parsing arguments')
     parser.add_argument('solver', type=str, help='Name of your solver, e.g. son_solver.py')
     parser.add_argument('algo', type=str, help='Name of your algorithm, e.g. nearest_neighbor_algo')
-    parser.add_argument('mode', type=str, help='The modes: test, test_validate, all, validate, compress')
+    parser.add_argument('mode', type=str, help='The modes: test, test_validate, all, validate, compress, clean')
     args = parser.parse_args()
     full_algo = os.getcwd() + '/' + args.algo
     full_outputs = full_algo + '/outputs'
@@ -25,6 +25,13 @@ if __name__ == '__main__':
         os.system('python3 output_validator.py --all inputs ' + outputs + ' ' + pickle + ' 2>&1 | tee ' + log)
     elif args.mode == 'compress':
         os.system('python3 compress_output.py ' + outputs + '/')
+    elif args.mode == 'clean':
+        if os.path.isdir('final'):
+            shutil.rmtree('final')
+        if os.path.isfile('outputs.json'):
+            os.remove('outputs.json')
+        if os.path.isfile('pickle_output/final.p'):
+            os.remove('pickle_output/final.p')
 
 
 
