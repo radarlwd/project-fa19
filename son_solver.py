@@ -35,14 +35,14 @@ def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_mat
     final_path = []
     final_dropoffs = {}
     for h in homes_idx:
+        homes_copy = homes_idx.copy()
         path = []
         path.extend(start_shortest_paths[h])
         path.pop()
         drop_offs = {}
-        if start_idx in homes_idx:
+        if start_idx in homes_copy:
             drop_offs[start_idx] = [start_idx]
-            homes_idx.remove(start_idx)
-        homes_copy = homes_idx.copy()
+            homes_copy.remove(start_idx)
         current_idx = h
         while homes_copy:
             lst_dist = []
