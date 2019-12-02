@@ -4,7 +4,7 @@ sys.path.append('..')
 sys.path.append('../..')
 import argparse
 import utils
-
+from queue import PriorityQueue
 from student_utils import *
 """
 ======================================================================
@@ -12,24 +12,60 @@ from student_utils import *
 ======================================================================
 """
 
-def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_matrix, params=[]):
-    """
-    Write your algorithm here.
-    Input:
-        list_of_locations: A list of locations such that node i of the graph corresponds to name at index i of the list
-        list_of_homes: A list of homes
-        starting_car_location: The name of the starting location for the car
-        adjacency_matrix: The adjacency matrix from the input file
-    Output:
-        A list of locations representing the car path
-        A dictionary mapping drop-off location to a list of homes of TAs that got off at that particular location
-        NOTE: both outputs should be in terms of indices not the names of the locations themselves
-    """
-    # print("testing" + str(convert_locations_to_indices([starting_car_location], list_of_locations)))
-    car_path = convert_locations_to_indices([starting_car_location], list_of_locations)
-    drop_off_locations = {convert_locations_to_indices([starting_car_location], list_of_locations)[0]:
-                              convert_locations_to_indices(list_of_homes, list_of_locations)}
+# def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_matrix, params=[]):
+#     """
+#     Write your algorithm here.
+#     Input:
+#         list_of_locations: A list of locations such that node i of the graph corresponds to name at index i of the list
+#         list_of_homes: A list of homes
+#         starting_car_location: The name of the starting location for the car
+#         adjacency_matrix: The adjacency matrix from the input file
+#     Output:
+#         A list of locations representing the car path
+#         A dictionary mapping drop-off location to a list of homes of TAs that got off at that particular location
+#         NOTE: both outputs should be in terms of indices not the names of the locations themselves
+#     """
+#     # print("testing" + str(convert_locations_to_indices([starting_car_location], list_of_locations)))
+#     car_path = convert_locations_to_indices([starting_car_location], list_of_locations)
+#     drop_off_locations = {convert_locations_to_indices([starting_car_location], list_of_locations)[0]:
+#                               convert_locations_to_indices(list_of_homes, list_of_locations)}
+#
+#     return car_path, drop_off_locations
 
+def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_matrix, params=[]):
+    # Count adjacent homes for each vertice and add them to the PQ
+    start_idx = list_of_locations.index(starting_car_location)
+    homes_idx = [list_of_locations.index(h) for h in list_of_homes]
+    g, msg1 = adjacency_matrix_to_graph(adjacency_matrix)
+    PQ = PriorityQueue()
+    car_path = []
+    drop_off_locations = {}
+
+    # initilize PQ
+    for v in g.nodes():
+        homes = []
+        for nb in g.neighbors(v):
+            if nb in homes_idx:
+                homes.append(nb)
+        PQ.put((len(homes), (v, homes)))
+
+    cur_idx = start_idx
+    while homes_idx:
+        (dropoff_loc, dropoff_homes) = PQ.get()[1]
+        dropoff_copy = dropoff_homes.copy()
+        for h in dropoff_copy:
+            if h in homes_idx:
+                homes_idx.remove(h)
+            else:
+                dropoff_homes.remove(h)
+        if dropoff_homes:
+            s_path = nx.shortest_path(g, cur_idx, dropoff_loc, weight='weight')
+            cur_idx = dropoff_loc
+            s_path.pop()
+            car_path.extend(s_path)
+            drop_off_locations[dropoff_loc] = dropoff_homes
+
+    car_path.extend(nx.shortest_path(g, cur_idx, start_idx, weight='weight'))
     return car_path, drop_off_locations
 
 """
