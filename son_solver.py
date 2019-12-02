@@ -27,7 +27,7 @@ def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_mat
         NOTE: both outputs should be in terms of indices not the names of the locations themselves
     """
 
-    return k_layers_cluster(1, list_of_locations, list_of_homes, starting_car_location, adjacency_matrix)
+    return k_layers_cluster(2, list_of_locations, list_of_homes, starting_car_location, adjacency_matrix)
 
 
 def count_homes(k, graph, homes_idx):
