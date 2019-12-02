@@ -16,8 +16,10 @@ if __name__ == '__main__':
     elif args.mode == 'test_validate':
         os.system('python3 output_validator.py --all test_inputs test_outputs pickle_output/test.p 2>&1 | tee test_log.txt')
     elif args.mode == 'all':
-        os.mkdir(full_algo)
-        os.mkdir(full_outputs)
+        if not os.path.isdir(full_algo):
+            os.mkdir(full_algo)
+        if not os.path.isdir(full_outputs):
+            os.mkdir(full_outputs)
         os.system('python3 ' + args.solver + ' --all inputs ' + outputs)
     elif args.mode == 'validate':
         os.system('python3 output_validator.py --all inputs ' + outputs + ' ' + pickle + ' 2>&1 | tee ' + log)
