@@ -1,10 +1,11 @@
 inputs/116_50.in branch_and_bound_perm/outputs/116_50.out
 Processing inputs/116_50.in
+[(0, 1), (1, 2), (2, 3), (3, 5), (5, 4), (4, 7), (7, 6), (6, 8), (8, 9), (9, 10), (10, 11), (11, 10), (10, 9), (9, 8), (8, 6), (6, 0)]
 Comments about output file:
 
-The driving cost of your solution is 0.0.
-The walking cost of your solution is 5053.0.
-The total cost of your solution is 5053.0.
+The driving cost of your solution is 2116.0.
+The walking cost of your solution is 0.
+The total cost of your solution is 2116.0.
 
 inputs/16_100.in branch_and_bound_perm/outputs/16_100.out
 Processing inputs/16_100.in
@@ -2954,11 +2955,12 @@ The total cost of your solution is 556.792.
 
 inputs/23_100.in branch_and_bound_perm/outputs/23_100.out
 Processing inputs/23_100.in
+[(0, 8), (8, 9), (9, 16), (16, 17), (17, 18), (18, 11), (11, 10), (10, 14), (14, 12), (12, 13), (13, 0), (0, 15), (15, 0)]
 Comments about output file:
 
-The driving cost of your solution is 0.0.
-The walking cost of your solution is 103.0.
-The total cost of your solution is 103.0.
+The driving cost of your solution is 30.0.
+The walking cost of your solution is 0.
+The total cost of your solution is 30.0.
 
 inputs/131_200.in branch_and_bound_perm/outputs/131_200.out
 Processing inputs/131_200.in
@@ -4752,19 +4754,21 @@ The total cost of your solution is 100.0.
 
 inputs/307_50.in branch_and_bound_perm/outputs/307_50.out
 Processing inputs/307_50.in
+[(0, 2), (2, 7), (7, 17), (17, 13), (13, 12), (12, 11), (11, 26), (26, 28), (28, 35), (35, 33), (33, 35), (35, 32), (32, 30), (30, 38), (38, 30), (30, 43), (43, 40), (40, 42), (42, 41), (41, 45), (45, 46), (46, 43), (43, 30), (30, 35), (35, 28), (28, 20), (20, 28), (28, 26), (26, 11), (11, 10), (10, 15), (15, 17), (17, 7), (7, 5), (5, 4), (4, 0)]
 Comments about output file:
 
-The driving cost of your solution is 0.0.
-The walking cost of your solution is 4492.0.
-The total cost of your solution is 4492.0.
+The driving cost of your solution is 1346.6666666666667.
+The walking cost of your solution is 0.
+The total cost of your solution is 1346.6666666666667.
 
 inputs/23_50.in branch_and_bound_perm/outputs/23_50.out
 Processing inputs/23_50.in
+[(0, 3), (3, 13), (13, 6), (6, 8), (8, 9), (9, 7), (7, 10), (10, 4), (4, 5), (5, 11), (11, 12), (12, 0)]
 Comments about output file:
 
-The driving cost of your solution is 0.0.
-The walking cost of your solution is 108.0.
-The total cost of your solution is 108.0.
+The driving cost of your solution is 30.666666666666668.
+The walking cost of your solution is 0.
+The total cost of your solution is 30.666666666666668.
 
 inputs/350_100.in branch_and_bound_perm/outputs/350_100.out
 Processing inputs/350_100.in
@@ -7644,4 +7648,4 @@ The driving cost of your solution is 0.0.
 The walking cost of your solution is 15446.0.
 The total cost of your solution is 15446.0.
 
-Total cost is:  22241721122497.637
+Total cost is:  22241721116264.973
