@@ -55,10 +55,14 @@ if __name__ == '__main__':
     elif args.mode == 'clean':
         if os.path.isdir('final'):
             shutil.rmtree('final')
+        if os.path.isdir('test_outputs'):
+            shutil.rmtree('test_outputs')
         if os.path.isfile('outputs.json'):
             os.remove('outputs.json')
         if os.path.isfile('pickle_output/final.p'):
             os.remove('pickle_output/final.p')
+        if os.path.isfile('pickle_output/test.p'):
+            os.remove('pickle_output/test.p')
     elif args.mode == 'generate':
         select_outputs('pickle_output')
 
