@@ -5,7 +5,16 @@ sys.path.append('../..')
 import argparse
 import utils
 from student_utils import *
+import student_utils
+import random as rd
+import math
 from queue import PriorityQueue
+
+
+L_MAX = 120
+INIT_TEMP = 24
+ITER_NUM = 1000
+INIT_PROB = 0.5
 
 """
 ======================================================================
@@ -13,7 +22,7 @@ from queue import PriorityQueue
 ======================================================================
 """
 
-def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_matrix, params=[]):
+def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_matrix, input_file, params=[]):
     """
     Write your algorithm here.
     Input:
@@ -27,67 +36,143 @@ def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_mat
         NOTE: both outputs should be in terms of indices not the names of the locations themselves
     """
 
-    return k_layers_cluster2(1, list_of_locations, list_of_homes, starting_car_location, adjacency_matrix)
-
-def count_homes(k, graph, homes_idx):
-    lst = []
-    for node in graph.nodes():
-        lst_homes = []
-        neighbors = list(graph.neighbors(node))
-        for n in neighbors:
-            if n in homes_idx:
-                lst_homes.append(n)
-        if k == 2:
-            for n in neighbors:
-                for nn in graph.neighbors(n):
-                    if nn in homes_idx:
-                        lst_homes.append(nn)
-        if len(lst_homes) > 0:
-            lst.append((node, lst_homes))
-    return lst
-
-def init_pq(lst, graph, cur_idx):
-    shortest_paths = nx.shortest_path_length(graph, cur_idx, weight='weight')
-    pq = PriorityQueue()
-    for i in lst:
-        node = i[0]
-        pq.put((shortest_paths[node], i))
-    return pq
-
-def k_layers_cluster2(k, list_of_locations, list_of_homes, starting_car_location, adjacency_matrix):
-    start_idx = list_of_locations.index(starting_car_location)
     homes_idx = [list_of_locations.index(h) for h in list_of_homes]
-    graph, msg = adjacency_matrix_to_graph(adjacency_matrix)
-    path = []
-    drop_offs = {}
-    lst = count_homes(k, graph, homes_idx)
-    cur_idx = start_idx
-    while homes_idx:
-        pq = init_pq(lst, graph, cur_idx)
-        cost, center_homes = pq.get()
-        center = center_homes[0]
-        lst_homes = center_homes[1]
-        lst_copy = lst_homes.copy()
-        for h in lst_copy:
-            if h in homes_idx:
-                homes_idx.remove(h)
+    graph, msg = student_utils.adjacency_matrix_to_graph(adjacency_matrix)
+
+    nn_output_directory = 'nearest_neighbor_algo/outputs'
+    nn_output_file = utils.input_to_output(input_file, nn_output_directory)
+    nn_output_data = utils.read_file(nn_output_file)
+    car_cycle = nn_output_data[0]
+    car_cycle_idx = student_utils.convert_locations_to_indices(car_cycle, list_of_locations)
+
+    shortest_paths = nx.floyd_warshall(graph, weight='weight')
+    new_car_cycle_idx = local_search(car_cycle_idx, shortest_paths)
+
+    #final_path
+    final_cycle = []
+    for i in range(len(new_car_cycle_idx)-1):
+        shortest_path = nx.shortest_path(graph, new_car_cycle_idx[i], new_car_cycle_idx[i+1], weight='weight')
+        shortest_path.pop()
+        final_cycle.extend(shortest_path)
+    final_cycle.append(new_car_cycle_idx[-1])
+    dropoffs = get_valid_dropoffs(final_cycle, homes_idx)
+    return final_cycle, dropoffs
+
+def get_shortest_cost(car_path, shortest_paths):
+    total = 0
+    for i in range(len(car_path)-1):
+        total += (shortest_paths[car_path[i]][car_path[i+1]] * 2 / 3)
+    return total
+
+
+def inverse(car_path, i, j):
+    """swap anything in between i and j, both indices inclusively"""
+    return car_path[:i] + car_path[i:j+1][::-1] + car_path[j+1:]
+
+def insert(car_path, i, j):
+    p = car_path[:]
+    item = p.pop(j)
+    p.insert(i, item)
+    return p
+
+def swap(car_path, i, j):
+    p = car_path[:]
+    p[i], p[j] = p[j], p[i]
+    return p
+
+def get_valid_dropoffs(car_path, homes_idx):
+    drop_off_locations = {}
+    for v in car_path:
+        if v in homes_idx:
+            drop_off_locations[v] = [v]
+    return drop_off_locations
+
+def get_local_best_neighbor(car_path, shortest_paths, i ,j):
+    """Minimum of three modified paths, original one not included"""
+    p1 = inverse(car_path, i, j)
+    p2 = insert(car_path, i, j)
+    p3 = swap(car_path, i, j)
+    cost_dict = {}
+#     print(get_shortest_cost(car_path, shortest_paths))
+    cost_dict["p1"] = get_shortest_cost(p1, shortest_paths)
+    cost_dict["p2"] = get_shortest_cost(p2, shortest_paths)
+    cost_dict["p3"] = get_shortest_cost(p3, shortest_paths)
+
+#     print(cost_dict)
+    minKey = min(cost_dict, key=cost_dict.get)
+    if minKey == "p1":
+        return p1, cost_dict["p1"]
+    elif minKey == "p2":
+        return p2, cost_dict["p2"]
+    else:
+        return p3, cost_dict["p3"]
+
+
+def init_temp_list(car_path, shortest_paths, length):
+    L = PriorityQueue()
+    i = 0
+    while i < length:
+        neighbor, costy = rand_gen_neighbor(car_path, shortest_paths)
+        costx = get_shortest_cost(car_path, shortest_paths)
+        if costy < costx:
+            car_path = neighbor
+        else:
+            t = -abs(costy - costx) / math.log(INIT_PROB)
+            L.put(-t)
+            i = i + 1
+    return L
+
+def gen_rand_idx(x, y):
+    while True:
+        a = rd.randint(x, y)
+        b = rd.randint(x, y)
+        if abs(a-b) >= 2:
+            if a < b:
+                return a, b
             else:
-                lst_homes.remove(h)
-        if lst_homes:
-            if len(lst_homes) == 1:
-                center = lst_homes[0]
-            shortest_path = nx.shortest_path(graph, cur_idx, center, 'weight')
-            shortest_path.pop()
-            path.extend(shortest_path)
-            if center in drop_offs:
-                drop_offs[center] += lst_homes
+                return b, a
+
+def rand_gen_neighbor(car_path, shortest_paths):
+    i, j = gen_rand_idx(1, len(car_path)-2)
+    return get_local_best_neighbor(car_path, shortest_paths, i, j)
+
+def acceptance_probability(delta, t_max):
+    try:
+        return math.exp(-delta / t_max)
+    except ZeroDivisionError:
+        return 0
+    except OverflowError:
+        return 0
+
+def new_temp(t, delta, r):
+    return (t - delta) / math.log(r)
+
+def local_search(car_path, shortest_paths):
+    L = init_temp_list(car_path, shortest_paths, L_MAX)
+    k = 0
+    while k < L_MAX - 1:
+        t_max = -L.get(block=False)
+        k = k + 1
+        t = 0
+        c = 0
+        m = 0
+        while m < ITER_NUM:
+            m = m + 1
+            neighbor, costy = rand_gen_neighbor(car_path, shortest_paths)
+            costx = get_shortest_cost(car_path, shortest_paths)
+            if costy < costx:
+                car_path = neighbor
             else:
-                drop_offs[center] = lst_homes
-            cur_idx = center
-        lst.remove(center_homes)
-    last_shortest_path = nx.shortest_path(graph, cur_idx, start_idx, 'weight')
-    path.extend(last_shortest_path)
-    return path, drop_offs
+                delta = costy - costx
+                p = acceptance_probability(delta, t_max)
+                r = rd.random()
+                if r < p:
+                    t = new_temp(t, delta, r)
+                    c = c + 1
+        if c != 0:
+            L.get(block=False)
+            L.put(-t/c)
+    return car_path
 
 
 """
@@ -123,7 +208,7 @@ def solve_from_file(input_file, output_directory, params=[]):
 
     input_data = utils.read_file(input_file)
     num_of_locations, num_houses, list_locations, list_houses, starting_car_location, adjacency_matrix = data_parser(input_data)
-    car_path, drop_offs = solve(list_locations, list_houses, starting_car_location, adjacency_matrix, params=params)
+    car_path, drop_offs = solve(list_locations, list_houses, starting_car_location, adjacency_matrix, input_file, params=params)
 
     basename, filename = os.path.split(input_file)
     if not os.path.exists(output_directory):
