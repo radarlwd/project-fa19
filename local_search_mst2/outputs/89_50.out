@@ -1,0 +1,22 @@
+start a1 a2 a3 a4 a5 start d3 d6 d5 d4 d2 d1 start c3 c1 c3 c5 c6 c7 c24 c23 c21 c20 c17 c20 c36 c35 c32 c27 c26 c27 c31 c33 c31 c35 c36 c20 c11 c12 c10 c13 c15 c14 c10 c9 c8 c3 start
+20
+a1 a1
+a2 a2
+a3 a3
+a4 a4
+a5 a5
+d5 d5
+d4 d4
+d1 d1
+c1 c1
+c5 c5
+c23 c23
+c21 c21
+c17 c17
+c27 c27
+c26 c26
+c31 c31
+c33 c33
+c10 c10
+c13 c13
+c15 c15
