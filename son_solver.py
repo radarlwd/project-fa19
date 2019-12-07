@@ -11,8 +11,8 @@ import math
 from queue import PriorityQueue
 
 
-L_MAX = 40
-INIT_TEMP = 18
+L_MAX = 100
+INIT_TEMP = 32
 ITER_NUM = 1000
 INIT_PROB = 0.9
 
@@ -35,18 +35,20 @@ def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_mat
         A dictionary mapping drop-off location to a list of homes of TAs that got off at that particular location
         NOTE: both outputs should be in terms of indices not the names of the locations themselves
     """
-
+    start_idx = list_of_locations.index(starting_car_location)
     homes_idx = [list_of_locations.index(h) for h in list_of_homes]
+    new_homes_idx = convert_homes_idx(start_idx, homes_idx)
     graph, msg = student_utils.adjacency_matrix_to_graph(adjacency_matrix)
 
     #nn_output_directory = 'nearest_neighbor_algo/outputs'
     #nn_output_directory = 'local_search/outputs'
     #nn_output_directory = 'mst_2_approximation/outputs'
-    nn_output_directory = 'local_search2run/outputs'
-    nn_output_file = utils.input_to_output(input_file, nn_output_directory)
-    nn_output_data = utils.read_file(nn_output_file)
-    car_cycle = nn_output_data[0]
-    car_cycle_idx = student_utils.convert_locations_to_indices(car_cycle, list_of_locations)
+    #nn_output_directory = 'local_search2run/outputs'
+    #nn_output_file = utils.input_to_output(input_file, nn_output_directory)
+    #nn_output_data = utils.read_file(nn_output_file)
+    #car_cycle = nn_output_data[0]
+    #car_cycle_idx = student_utils.convert_locations_to_indices(car_cycle, list_of_locations)
+    car_cycle_idx = new_homes_idx
 
     shortest_paths = nx.floyd_warshall(graph, weight='weight')
     new_car_cycle_idx = local_search(car_cycle_idx, shortest_paths)
@@ -60,6 +62,14 @@ def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_mat
     final_cycle.append(new_car_cycle_idx[-1])
     dropoffs = get_valid_dropoffs(final_cycle, homes_idx)
     return final_cycle, dropoffs
+
+def convert_homes_idx(starting_idx, homes_idx):
+    lst = [starting_idx]
+    for h in homes_idx:
+        if h != starting_idx:
+            lst.append(h)
+    lst.append(starting_idx)
+    return lst
 
 def get_shortest_cost(car_path, shortest_paths):
     total = 0
