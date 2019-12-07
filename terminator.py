@@ -50,7 +50,7 @@ if __name__ == '__main__':
             os.mkdir(full_outputs)
         os.system('python3 ' + args.solver + ' --all ' + args.input + ' ' + outputs)
     elif args.mode == 'validate':
-        os.system('python3 output_validator.py --all inputs ' + outputs + ' ' + pickle + ' 2>&1 | tee ' + log)
+        os.system('python3 output_validator.py --all ' + args.input + ' ' + outputs + ' ' + pickle + ' 2>&1 | tee ' + log)
     elif args.mode == 'compress':
         os.system('python3 compress_output.py ' + outputs + '/')
     elif args.mode == 'clean':
