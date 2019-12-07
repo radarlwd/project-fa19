@@ -1,6 +1,7 @@
 import argparse, os, shutil
 from utils import *
 from student_utils import *
+import re
 
 def select_outputs(pickle_dir):
     pfiles = get_files_with_extension(pickle_dir, 'p')
@@ -11,6 +12,12 @@ def select_outputs(pickle_dir):
         for item in pobj:
             # key=<./path/to/input_file>.in, value=(<./path/to/output_file.out>, cost)
             input_file = item[0]
+
+            # standardize the input_file
+            # inputs_1/50_100.in => inputs/50_100.in
+            re_obj = re.search("(inputs)(_\d)(.*)", input_file)
+            if re_obj:
+                input_file = re_obj[1]+re_obj[3]
             output_file = item[1]
             cost = item[2][0]
             if input_file in dic:
@@ -20,10 +27,12 @@ def select_outputs(pickle_dir):
     if not os.path.isdir('final/outputs'):
         os.mkdir('final')
         os.mkdir('final/outputs')
+    print(len(dic))
     for lst in dic.values():
         best_output, best_cost = min(lst, key=lambda x: x[1])
         os.system('cp ' + best_output + ' final/outputs/')
         meta_dic[best_output] = best_cost
+    print(len(meta_dic))
     save_obj(meta_dic, 'final/meta.p')
     write_data_to_file('final/meta.txt', meta_dic.items(), '\n')
 
