@@ -11,10 +11,10 @@ import math
 from queue import PriorityQueue
 
 
-L_MAX = 120
-INIT_TEMP = 24
+L_MAX = 40
+INIT_TEMP = 18
 ITER_NUM = 1000
-INIT_PROB = 0.5
+INIT_PROB = 0.9
 
 """
 ======================================================================
@@ -41,7 +41,8 @@ def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_mat
 
     #nn_output_directory = 'nearest_neighbor_algo/outputs'
     #nn_output_directory = 'local_search/outputs'
-    nn_output_directory = 'mst_2_approximation/outputs'
+    #nn_output_directory = 'mst_2_approximation/outputs'
+    nn_output_directory = 'local_search2/outputs'
     nn_output_file = utils.input_to_output(input_file, nn_output_directory)
     nn_output_data = utils.read_file(nn_output_file)
     car_cycle = nn_output_data[0]
