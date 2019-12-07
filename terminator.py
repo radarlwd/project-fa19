@@ -31,6 +31,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parsing arguments')
     parser.add_argument('solver', type=str, help='Name of your solver, e.g. son_solver.py')
     parser.add_argument('algo', type=str, help='Name of your algorithm, e.g. nearest_neighbor_algo')
+    parser.add_argument('input', type=str, help='Name of your input folder, e.g. inputs')
     parser.add_argument('mode', type=str, help='The modes: test, test_validate, all, validate, compress, clean, generate')
     args = parser.parse_args()
     full_algo = os.getcwd() + '/' + args.algo
@@ -47,7 +48,7 @@ if __name__ == '__main__':
             os.mkdir(full_algo)
         if not os.path.isdir(full_outputs):
             os.mkdir(full_outputs)
-        os.system('python3 ' + args.solver + ' --all inputs ' + outputs)
+        os.system('python3 ' + args.solver + ' --all ' + args.input + ' ' + outputs)
     elif args.mode == 'validate':
         os.system('python3 output_validator.py --all inputs ' + outputs + ' ' + pickle + ' 2>&1 | tee ' + log)
     elif args.mode == 'compress':
