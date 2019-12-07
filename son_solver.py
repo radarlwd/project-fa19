@@ -39,7 +39,8 @@ def solve(list_of_locations, list_of_homes, starting_car_location, adjacency_mat
     homes_idx = [list_of_locations.index(h) for h in list_of_homes]
     graph, msg = student_utils.adjacency_matrix_to_graph(adjacency_matrix)
 
-    nn_output_directory = 'nearest_neighbor_algo/outputs'
+    #nn_output_directory = 'nearest_neighbor_algo/outputs'
+    nn_output_directory = 'local_search/outputs'
     nn_output_file = utils.input_to_output(input_file, nn_output_directory)
     nn_output_data = utils.read_file(nn_output_file)
     car_cycle = nn_output_data[0]
